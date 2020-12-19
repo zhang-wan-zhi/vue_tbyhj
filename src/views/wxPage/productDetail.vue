@@ -63,7 +63,7 @@
             </div>
           </div>
           <div class="botton">
-            <VueEmoji @input="onInput" :value="articleCircle"/>
+            <VueEmoji @input="onInput" :value="articleCircle" />
             <!-- <p class="emojid">表情</p>
             <div class="allEmoji">
               <li @click="allEmojiChoosed(index)" v-for="(item,index) in emojiCompact" :key="index">
@@ -157,6 +157,7 @@
 <script>
 import upload from "./upload";
 import VueEmoji from "emoji-vue";
+import { EmojiPicker } from "../../emoji/js/emoji-picker";
 export default {
   name: "",
   data() {
@@ -174,28 +175,47 @@ export default {
       articleComment1: null,
       articleComment2: null,
       checked: false,
-      backPic: null,
+      backPic: "",
       allPic: [],
       getData: {},
-      articleCircle: null,
+      articleCircle: "",
+      myText: "",
+      /* str: '⛽️😗😊😁🎪⛽️啊' */
     };
   },
   created() {
     // this.emoji=emoji[0]
-    if(localStorage.getItem('goodsData')){
-      const dataGet = JSON.parse(localStorage.getItem('goodsData'))
+    if (localStorage.getItem("goodsData")) {
+      const dataGet = JSON.parse(localStorage.getItem("goodsData"));
+      // 获取默认图片
+      this.$http({
+        url:
+          "https://mpapi.tkbutiedan.com/mpapi/product/imgs/get?itemId=617059027975",
+        method: "get",
+      }).then((e) => {
+        console.log("成功获取e");
+        console.log(e);
+        for (let i = 0; i < e.data.data.length; i++) {
+          this.backPic += e.data.data[i] + ",";
+        }
+        /* basic = basic.substr(0, basic.length - 1) */
+        this.backPic = this.backPic.substr(0, this.backPic.length - 1);
+        console.log("这是backpic");
+        console.log(this.backPic);
+      });
       if (dataGet.shopType == "B") {
-        dataGet.productUrl = "https://detail.tmall.com/item.htm?id=" + dataGet.itemId
-        
+        dataGet.productUrl =
+          "https://detail.tmall.com/item.htm?id=" + dataGet.itemId;
       }
       if (dataGet.shopType == "A") {
-        dataGet.productUrl = "https://item.taobao.com/item.htm?id=" + dataGet.itemId
+        dataGet.productUrl =
+          "https://item.taobao.com/item.htm?id=" + dataGet.itemId;
       }
       // 获取默认图片
-      
-      this.loading = false
-      this.getData = dataGet
-      return
+
+      this.loading = false;
+      this.getData = dataGet;
+      return;
     }
     /* if(localStorage.getItem('goodsDatas')){
       const dataGet = JSON.parse(localStorage.getItem('goodsData'))
@@ -209,15 +229,16 @@ export default {
       this.getData = JSON.parse(localStorage.getItem('goodsDatas'))  
     } */
     if (this.$route.query.id) {
+      this.myText = window.localStorage.getItem("datas");
       this.id = this.$route.query.id;
       this.getbackData();
-      console.log('这是getdata');
+      console.log("这是getdata");
+      console.log(this.articleCircle);
       console.log(this.getData);
-      this.loading = false
+      this.loading = false;
       return;
     }
     /* console.log('成功执行2'); */
-    
   },
   destroyed() {
     localStorage.removeItem("goodsData");
@@ -228,13 +249,15 @@ export default {
     VueEmoji,
   },
   watch: {},
+  mounted() {
+    console.log('mounted的getData');
+    console.log(this.articleCircle);
+    let emojiPicker = new EmojiPicker();
+  },
   methods: {
     onInput(event) {
-      console.log(event);
-      
-      this.getData.articleCircle = event.data
-      console.log(this.getData);
-      //event.data contains the value of the textarea
+      console.log(event.data);
+      this.myText = event.data;
     },
     allEmojiChoosed(index) {
       this.emoji = emoji[index];
@@ -268,7 +291,7 @@ export default {
           "form"
         ),
       }).then((e) => {
-        console.log('这是e2');
+        console.log("这是e2");
         console.log(e);
         if (e.data.code !== 0) {
           // this.$refs["ruleForm"].resetFields();
@@ -277,15 +300,15 @@ export default {
         // this.failData = null;
         // this.$refs["ruleForm"].validate();
         /* let goodsData = e.data.data; */
-        this.getData = e.data.data
+        this.getData = e.data.data;
         this.getData.couponUrl = this.couponUrl;
         this.getData.productUrl = this.productUrl;
-        this.getData.articleCircle = this.articleCircle
-        this.getData.articleComment1 = this.articleComment1
-        this.getData.articleComment2 = this.articleComment2
+        this.getData.articleCircle = this.articleCircle;
+        this.getData.articleComment1 = this.articleComment1;
+        this.getData.articleComment2 = this.articleComment2;
 
         /* this.getData = JSON.parse(localStorage.getItem('goodsDatas')) */
-        console.log('zheshigetdata');
+        console.log("zheshigetdata");
         console.log(this.getData);
         /* if (!this.textarea6) {
           this.textarea6 = goodsData.guideArticle;
@@ -306,44 +329,52 @@ export default {
         method: "get",
         params: this.$http.adornParams({}),
       }).then((e) => {
-        if (e.data.code == 0) { 
-        if (e.data.data.updateTime) {
-          this.checked = true;
-          this.value1 = e.data.data.updateTime;
-        }
-        console.log('这是e');
-        console.log(e);
-        this.couponUrl = e.data.data.couponUrl;
-        this.productUrl = e.data.data.productUrl;
-        this.articleCircle = e.data.data.articleCircle
-        this.articleComment1 = e.data.data.articleComment1
-        this.articleComment2 = e.data.data.articleComment2
-        this.backDisplay();
-        // this.getData.itemPic=e.data.data.itemPic;
-        // this.getData.itemPic=e.data.data.itemPic;
-        // this.getData.itemPic=e.data.data.itemPic;
-        /* this.textarea6 = e.data.data.articleCircle;
+        if (e.data.code == 0) {
+          if (e.data.data.updateTime) {
+            this.checked = true;
+            this.value1 = e.data.data.updateTime;
+          }
+          console.log("这是e");
+          console.log(e);
+          this.couponUrl = e.data.data.couponUrl;
+          this.productUrl = e.data.data.productUrl;
+          this.articleCircle = e.data.data.articleCircle;
+          console.log("articleCircle");
+          console.log(this.articleCircle);
+          let emojiPicker = new EmojiPicker();
+          let text = emojiPicker.unicodeToImage(this.articleCircle)
+          this.articleCircle = text
+          console.log('装换后');
+          console.log(text);
+          console.log(emojiPicker);
+          this.articleComment1 = e.data.data.articleComment1;
+          this.articleComment2 = e.data.data.articleComment2;
+          this.backDisplay();
+          // this.getData.itemPic=e.data.data.itemPic;
+          // this.getData.itemPic=e.data.data.itemPic;
+          // this.getData.itemPic=e.data.data.itemPic;
+          /* this.textarea6 = e.data.data.articleCircle;
 
         this.textarea7 = e.data.data.articleComment1;
         this.textarea8 = e.data.data.articleComment2; */
-        this.backPic =
-          e.data.data.imgUrl1 +
-          "," +
-          e.data.data.imgUrl2 +
-          "," +
-          e.data.data.imgUrl3 +
-          "," +
-          e.data.data.imgUrl4 +
-          "," +
-          e.data.data.imgUrl5 +
-          "," +
-          e.data.data.imgUrl6 +
-          "," +
-          e.data.data.imgUrl7 +
-          "," +
-          e.data.data.imgUrl8 +
-          "," +
-          e.data.data.imgUrl9;
+          this.backPic =
+            e.data.data.imgUrl1 +
+            "," +
+            e.data.data.imgUrl2 +
+            "," +
+            e.data.data.imgUrl3 +
+            "," +
+            e.data.data.imgUrl4 +
+            "," +
+            e.data.data.imgUrl5 +
+            "," +
+            e.data.data.imgUrl6 +
+            "," +
+            e.data.data.imgUrl7 +
+            "," +
+            e.data.data.imgUrl8 +
+            "," +
+            e.data.data.imgUrl9;
         }
       });
     },
@@ -364,96 +395,100 @@ export default {
     circlrUpadte() {
       console.log(this.getData);
       console.log(this.value1);
-      if(localStorage.getItem('goodsData')){
-      /* console.log(localStorage.getItem('goodsData')); */
-      if (this.allPic[0]) {
-        var index = this.allPic[0].indexOf("/upload/");
-      }
-
-      this.$http({
-        url: this.$http.adornUrl("product/friend/circle/save"),
-        method: "post",
-        data: this.$http.adornData({
-          archive: 0,
-          articleCircle: this.getData.articleCircle,
-          articleComment1: this.getData.articleComment1,
-          articleComment2: this.getData.articleComment2,
-          couponUrl: this.getData.couponUrl,
-          id: this.id,
-          sendTime: this.value1,
-          imgUrl1: this.allPic[0] && this.allPic[0].slice(index + 1),
-          imgUrl2: this.allPic[1] && this.allPic[1].slice(index + 1),
-          imgUrl3: this.allPic[2] && this.allPic[2].slice(index + 1),
-          imgUrl4: this.allPic[3] && this.allPic[3].slice(index + 1),
-          imgUrl5: this.allPic[4] && this.allPic[4].slice(index + 1),
-          imgUrl6: this.allPic[5] && this.allPic[5].slice(index + 1),
-          imgUrl7: this.allPic[6] && this.allPic[6].slice(index + 1),
-          imgUrl8: this.allPic[7] && this.allPic[7].slice(index + 1),
-          imgUrl9: this.allPic[8] && this.allPic[8].slice(index + 1),
-          productUrl: this.getData.productUrl,
-          itemId: this.getData.itemId,
-          itemTitle: this.getData.itemTitle,
-          itemPic: this.getData.itemPic,
-          status: 0,
-          updateTime: null,
-          userId: 0,
-          videoUrl: null,
-        }),
-      }).then((e) => {
-        if (e.data.code == 0) {
-          this.$message({
-            showClose: true,
-            message: "提交成功！",
-          });
-          this.$router.push({ name: "home" });
+      if (localStorage.getItem("goodsData")) {
+        /* console.log(localStorage.getItem('goodsData')); */
+        if (this.allPic[0]) {
+          var index = this.allPic[0].indexOf("/upload/");
         }
-      });
+
+        this.$http({
+          url: this.$http.adornUrl("product/friend/circle/save"),
+          method: "post",
+          data: this.$http.adornData({
+            archive: 0,
+            articleCircle: this.myText,
+            articleComment1: this.articleComment1,
+            articleComment2: this.articleComment2,
+            couponUrl: this.getData.couponUrl,
+            id: this.id,
+            sendTime: this.value1,
+            imgUrl1: this.allPic[0] && this.allPic[0].slice(index + 1),
+            imgUrl2: this.allPic[1] && this.allPic[1].slice(index + 1),
+            imgUrl3: this.allPic[2] && this.allPic[2].slice(index + 1),
+            imgUrl4: this.allPic[3] && this.allPic[3].slice(index + 1),
+            imgUrl5: this.allPic[4] && this.allPic[4].slice(index + 1),
+            imgUrl6: this.allPic[5] && this.allPic[5].slice(index + 1),
+            imgUrl7: this.allPic[6] && this.allPic[6].slice(index + 1),
+            imgUrl8: this.allPic[7] && this.allPic[7].slice(index + 1),
+            imgUrl9: this.allPic[8] && this.allPic[8].slice(index + 1),
+            productUrl: this.getData.productUrl,
+            itemId: this.getData.itemId,
+            itemTitle: this.getData.itemTitle,
+            itemPic: this.getData.itemPic,
+            status: 0,
+            updateTime: null,
+            userId: 0,
+            videoUrl: null,
+          }),
+        }).then((e) => {
+          if (e.data.code == 0) {
+            this.$message({
+              showClose: true,
+              message: "提交成功！",
+              type: "success",
+            });
+            this.$router.push({ name: "home" });
+          }
+        });
       }
       // 修改文案提交
       if (this.$route.query.id) {
-        console.log('提交修改data');
+        console.log("提交修改data");
         console.log(this.getData);
         this.id = this.$route.query.id;
+        console.log('提交时');
+        console.log(this.getData.articleCircle);
         this.$http({
-        url: this.$http.adornUrl("product/friend/circle/update"),
-        method: "post",
-        data: this.$http.adornData({
-          archive: 0,
-          articleCircle: this.getData.articleCircle,
-          articleComment1: this.getData.articleComment1,
-          articleComment2: this.getData.articleComment2,
-          couponUrl: this.getData.couponUrl,
-          id: this.id,
-          sendTime: this.value1,
-          imgUrl1: this.allPic[0] && this.allPic[0].slice(index + 1),
-          imgUrl2: this.allPic[1] && this.allPic[1].slice(index + 1),
-          imgUrl3: this.allPic[2] && this.allPic[2].slice(index + 1),
-          imgUrl4: this.allPic[3] && this.allPic[3].slice(index + 1),
-          imgUrl5: this.allPic[4] && this.allPic[4].slice(index + 1),
-          imgUrl6: this.allPic[5] && this.allPic[5].slice(index + 1),
-          imgUrl7: this.allPic[6] && this.allPic[6].slice(index + 1),
-          imgUrl8: this.allPic[7] && this.allPic[7].slice(index + 1),
-          imgUrl9: this.allPic[8] && this.allPic[8].slice(index + 1),
-          productUrl: this.getData.productUrl,
-          itemId: this.getData.itemId,
-          itemTitle: this.getData.itemTitle,
-          itemPic: this.getData.itemPic,
-          status: 0,
-          updateTime: null,
-          userId: 0,
-          videoUrl: null,
-        }),
-      }).then((e) => {
-        if (e.data.code == 0) {
-          this.$message({
-            showClose: true,
-            message: "修改成功！",
-          });
-          this.$router.push({ name: "home" });
-        }
-      });
+          url: this.$http.adornUrl("product/friend/circle/update"),
+          method: "post",
+          data: this.$http.adornData({
+            archive: 0,
+            articleCircle: this.myText,
+            articleComment1: this.articleComment1,
+            articleComment2: this.articleComment2,
+            couponUrl: this.getData.couponUrl,
+            id: this.id,
+            sendTime: this.value1,
+            imgUrl1: this.allPic[0] && this.allPic[0].slice(index + 1),
+            imgUrl2: this.allPic[1] && this.allPic[1].slice(index + 1),
+            imgUrl3: this.allPic[2] && this.allPic[2].slice(index + 1),
+            imgUrl4: this.allPic[3] && this.allPic[3].slice(index + 1),
+            imgUrl5: this.allPic[4] && this.allPic[4].slice(index + 1),
+            imgUrl6: this.allPic[5] && this.allPic[5].slice(index + 1),
+            imgUrl7: this.allPic[6] && this.allPic[6].slice(index + 1),
+            imgUrl8: this.allPic[7] && this.allPic[7].slice(index + 1),
+            imgUrl9: this.allPic[8] && this.allPic[8].slice(index + 1),
+            productUrl: this.getData.productUrl,
+            itemId: this.getData.itemId,
+            itemTitle: this.getData.itemTitle,
+            itemPic: this.getData.itemPic,
+            status: 0,
+            updateTime: null,
+            userId: 0,
+            videoUrl: null,
+          }),
+        }).then((e) => {
+          if (e.data.code == 0) {
+            this.$message({
+              showClose: true,
+              message: "修改成功！",
+              type: "success",
+            });
+            this.$router.push({ name: "home" });
+          }
+        });
       }
-      
+
       //  product/friend/circle/update
     },
     add(con, isEmoji) {
@@ -481,7 +516,7 @@ export default {
       node.setAttribute("class", "at");
 
       node.innerHTML = con;
-      Range.insertNode(node)
+      Range.insertNode(node);
       /* var node =
         typeof content === "string"
           ? document.createTextNode(content)
@@ -720,5 +755,4 @@ h4 {
   top: 275px !important;
   left: 0px !important;
 }
-
 </style>

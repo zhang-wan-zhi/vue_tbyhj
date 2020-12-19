@@ -8,6 +8,7 @@
         accept=".jpg, .png, .bmp, .gif , .mp4"
         :on-remove="handleRemove"
         :on-change="changeFile"
+        :before-upload="beforeUpload"
         :http-request="uploadSectionFile"
         :file-list="fileLists"
       >
@@ -84,15 +85,21 @@ export default {
   //   this.urlLength=
   // },
   methods: {
+    beforeUpload() {
+      console.log('beforeUpload');
+    },
     uploadSectionFile() {},
     handlePictureCardPreview(file, fileList) {
       console.log(file, 111);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-    changeFile(file, response) {
+    changeFile(file, response, fileList) {
       console.log("来了", file, this.limit);
+      console.log('response');
       console.log(response);
+      console.log('fileList');
+      console.log(fileList);
       // this.$emit('addPic','我来了')
       var _this = this;
       // 判断上传文件种类个数
@@ -190,6 +197,7 @@ export default {
         }, 0);
       };
     },
+    
   },
 };
 </script>

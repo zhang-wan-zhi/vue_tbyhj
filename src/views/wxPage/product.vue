@@ -17,11 +17,12 @@
           <el-input v-model="ruleForm.couponUrl"></el-input>
         </el-form-item>
       </el-form>
-
+      <span id="detectionBtn">
+        <el-button @click="mouseOut2()" type="success" id="button">检 测</el-button>
+      </span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="mouseOut2()" type="warning">检 测</el-button>
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="confirmDialogVisible"
+        <el-button type="primary" @click="confirmDialogVisible" :disabled="btnState"
           >确 定</el-button
         >
       </span>
@@ -313,6 +314,7 @@ export default {
       endDateTime: null,
       centerDialogVisible: false,
       loading: true,
+      btnState: true
     };
   },
   created() {
@@ -361,6 +363,7 @@ export default {
             // this.$refs["ruleForm"].resetFields();
             return;
           }
+          this.btnState = false
           this.$message({
             message: "优惠券检测成功",
             type: "success",
@@ -715,5 +718,8 @@ export default {
 }
 .send_right {
   float: right;
+}
+#detectionBtn {
+  margin-left: 20px;
 }
 </style>
