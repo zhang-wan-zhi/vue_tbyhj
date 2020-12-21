@@ -755,4 +755,9 @@ h4 {
   top: 275px !important;
   left: 0px !important;
 }
+.all >>> .emoji-wysiwyg-editor:focus {
+    outline:none;
+    border: 1px solid #17B3A3!important;
+    
+}
 </style>
